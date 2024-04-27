@@ -8,12 +8,25 @@ metadata:
   {{- with .Values.migrate.labels }}
     {{- toYaml . | nindent 4}}
   {{- end}}
-  {{- with .Values.migrate.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- with .Values.migrate.annotations }}
+    {{- toYaml . | nindent 4}}
+  {{- end}}
+  {{- if .Values.migrate.hook.enable }}
+    helm.sh/hook: {{ .Values.migrate.hook.hook | quote }}
+    helm.sh/hook-weight: {{ .Values.migrate.hook.hookWeight | quote }}
+    helm.sh/hook-delete-policy: {{ .Values.migrate.hook.hookDeletePolicy | quote }}
+  {{- end}}
 spec:
   backoffLimit: 3
+  {{- if ge (int .Values.migrate.ttlSecondsAfterFinished) 0 }}
+  ttlSecondsAfterFinished: {{ .Values.migrate.ttlSecondsAfterFinished }}
+  {{- end }}
+  manualSelector: true
+  selector:
+    matchLabels:
+      {{- include "openfga.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: migrate
   template:
     metadata:
       {{- with .Values.migrate.annotations }}
@@ -21,10 +34,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "openfga.labels" . | nindent 8 }}
+        {{- include "openfga.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
       {{- with .Values.migrate.labels }}
-        {{- toYaml . | nindent 8}}
-      {{- end}}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

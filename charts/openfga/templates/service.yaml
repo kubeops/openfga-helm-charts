@@ -17,7 +17,7 @@ spec:
       protocol: TCP
 
     {{- if .Values.http.enabled }}
-    - name: http 
+    - name: http
       port: {{ (split ":" .Values.http.addr)._1 }}
       targetPort: http
       protocol: TCP
@@ -46,3 +46,4 @@ spec:
 
   selector:
     {{- include "openfga.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: server
