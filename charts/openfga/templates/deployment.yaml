@@ -15,6 +15,7 @@ spec:
   selector:
     matchLabels:
       {{- include "openfga.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: authorization-controller
   template:
     metadata:
       annotations:
